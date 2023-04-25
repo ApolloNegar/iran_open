@@ -4,12 +4,11 @@ import time
 import LaneDetectionFunctions
 from HSV_picker import hsv, hsv_window_trackbar
 from steering import calculate_steer
+# from motorControl import send_serial
 #### debug mode: HSV color picker 
 debug_mode_HSV = False 
 ### debug mode: Region of Interest 
 debug_mode_roi = True
-
-
 
 def roi(image, points):
     # (height, width) = image.shape
@@ -42,10 +41,11 @@ def getLaneCurve(frame):
     if debug_mode_HSV:
         hsv(frame)
 
-    lined_img, params = LaneDetectionFunctions.hough(roi_image)
-    calculate_steer(*params)
-
-    # cv2.imshow('warp image', imgWarp)
+    lined_img,image, params = LaneDetectionFunctions.hough(roi_image)
+    direction, angle = calculate_steer(*params)
+    print(direction, angle)
+    # send_serial(angle=angle+80)
+    cv2.imshow('image', image)
     # cv2.imshow('image warp points', imgWarpPoints)
     
 
@@ -61,7 +61,7 @@ def getLaneCurve(frame):
     cv2.imshow('final image', lined_img)
 
 if __name__ == "__main__":
-    cap = cv2.VideoCapture(r'clips\race.mkv') # test video
+    # cap = cv2.VideoCapture(r'clips\race.mkv') # test video
 
     if debug_mode_roi:
         # create warp points trackbar
@@ -73,16 +73,19 @@ if __name__ == "__main__":
         hsv_window_trackbar() 
         
     frameCounter = 0
+    img = cv2.imread(r"clips\1.jpg" )
 
     # repeating the video
     while True:
-        frameCounter += 1
-        if cap.get(cv2.CAP_PROP_FRAME_COUNT) == frameCounter:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            frameCounter = 0
+        # frameCounter += 1
+        # if cap.get(cv2.CAP_PROP_FRAME_COUNT) == frameCounter:
+        #     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        #     frameCounter = 0
 
-        success, img = cap.read()
-    
+        # success, img = cap.read()
+
+        img = cv2.imread(r"clips\1.jpg" )
+        
         img = cv2.resize(img, (240,480))
 
 
@@ -90,6 +93,6 @@ if __name__ == "__main__":
             break
         getLaneCurve(img)
 
-        cv2.waitKey(1)
+    cv2.waitKey(1)
 
     cv2.destroyAllWindows()

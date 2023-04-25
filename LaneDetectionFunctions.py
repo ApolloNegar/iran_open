@@ -3,12 +3,15 @@ import numpy as np
 
 # {'h_min': 33, 'h_max': 179, 's_min': 0, 's_max': 255, 'v_min': 210, 'v_max': 255}
 # {'h_min': 0, 'h_max': 58, 's_min': 0, 's_max': 255, 'v_min': 133, 'v_max': 255}
+# {'h_min': 0, 'h_max': 179, 's_min': 0, 's_max': 255, 'v_min': 29, 'v_max': 255}
+# {'h_min': 25, 'h_max': 88, 's_min': 0, 's_max': 255, 'v_min': 201, 'v_max': 255}
+# {'h_min': 21, 'h_max': 179, 's_min': 0, 's_max': 255, 'v_min': 219, 'v_max': 255}
 def tresholding(img, h_min=27,s_min=0,v_min=246, h_max=179,s_max=255,v_max=255):
     # img -> hsv space
 
     imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    lowerWhite = np.array([0,0,133])
-    upperWhite = np.array([58,255,255])
+    lowerWhite = np.array([21,0,219])
+    upperWhite = np.array([179,255,255])
     maskWhite = cv2.inRange(imgHsv, lowerWhite, upperWhite)
     masked_img = cv2.bitwise_and(img,img,mask=maskWhite)
     mask = cv2.cvtColor(maskWhite, cv2.COLOR_GRAY2BGR)
@@ -61,6 +64,8 @@ def hough(edges):
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 50, np.array([]), minLineLength=20, maxLineGap=100)
     image = np.zeros_like(edges)
     height, width = edges.shape
+    min_y = 234
+    max_y = 480
     try:
         x_mean_frame, x_mean_bott, x_mean_top = 0,0,0 # inisialize them
 
@@ -104,12 +109,8 @@ def hough(edges):
             x_mean_bott = (x1_left + x1_right) // 2
             x_mean_top = (x2_left + x2_right) // 2
 
-
-
-
             x_mean_frame = edges.shape[1] // 2
 
-            
             # cv2.putText(edges, f'x_mean_frame - x_mean_top= {x_mean_frame-x_mean_top}',
             #             cv2.FONT_HERSHEY_SIMPLEX, 1, color=(255,255,255), thickness=3 )
             cv2.circle(edges, center=(x_mean_frame,max_y), radius=10, color=(255,255,255), thickness=5)
@@ -119,16 +120,18 @@ def hough(edges):
             
             # print(f"left_slope: {left_slope}")
             # print(f"right_slope: {right_slope}")
-            cv2.line(edges, (x1_left, max_y), (x2_left, min_y), (255,0,0), 5 )
-            cv2.line(edges, (x1_right, max_y), (x2_right, min_y), (255,0,0),5)
+            cv2.line(edges, (x1_left, max_y), (x2_left, min_y), (255,255,255), 5 )
+            cv2.line(edges, (x1_right, max_y), (x2_right, min_y), (255,255,255),5)
             cv2.putText(edges, f'x_mean_top - x_mean_bott= {x_mean_top-x_mean_bott}',
                          (2,30), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,255), 1, cv2.LINE_AA)
         except:
-            print('what??')
-            raise
+            # print('what??')
+            # raise
+            pass
     except:
-        print('error')
+        # print('error')
         # raise
-    return edges, [x_mean_frame, x_mean_bott, x_mean_top, min_y, max_y]
+        pass
+    return edges,image,  [x_mean_frame, x_mean_bott, x_mean_top, min_y, max_y]
     
 
